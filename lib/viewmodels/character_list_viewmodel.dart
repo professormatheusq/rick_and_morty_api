@@ -89,7 +89,12 @@ class CharacterListViewModel extends ChangeNotifier {
   }
 
   Future<void> loadMore() async {
-    if (!_hasMore || _isLoadingMore) return;
+    await loadMoreWithResult();
+  }
+
+  /// Retorna true se sucesso, false se erro
+  Future<bool> loadMoreWithResult() async {
+    if (!_hasMore || _isLoadingMore) return true;
     _isLoadingMore = true;
     notifyListeners();
 
@@ -107,12 +112,14 @@ class CharacterListViewModel extends ChangeNotifier {
       if (_query.isNotEmpty) {
         _cache[cacheKey] = List<Character>.from(_items);
       }
+      _isLoadingMore = false;
+      notifyListeners();
+      return true;
     } catch (_) {
-      // keep items, allow retry by user scrolling again or pull-to-refresh
+      _isLoadingMore = false;
+      notifyListeners();
+      return false;
     }
-
-    _isLoadingMore = false;
-    notifyListeners();
   }
 
   @override

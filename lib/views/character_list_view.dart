@@ -16,6 +16,7 @@ class _CharacterListViewState extends State<CharacterListView> {
   final ScrollController _scroll = ScrollController();
   final TextEditingController _searchCtrl = TextEditingController();
 
+  bool _loadMoreError = false;
   @override
   void initState() {
     super.initState();
@@ -26,10 +27,22 @@ class _CharacterListViewState extends State<CharacterListView> {
       vm.searchDebounced(_searchCtrl.text);
     });
 
-    _scroll.addListener(() {
+    _scroll.addListener(() async {
       // Infinite scroll trigger
       if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 200) {
-        vm.loadMore();
+        final result = await vm.loadMoreWithResult();
+        if (result == false && !_loadMoreError) {
+          _loadMoreError = true;
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Erro ao carregar mais personagens.'),
+              ),
+            );
+          }
+        } else if (result == true) {
+          _loadMoreError = false;
+        }
       }
     });
   }
@@ -114,7 +127,14 @@ class _CharacterListViewState extends State<CharacterListView> {
                 }
 
                 return RefreshIndicator(
-                  onRefresh: () => vm.refresh(),
+                  onRefresh: () async {
+                    await vm.refresh();
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Lista atualizada!')),
+                      );
+                    }
+                  },
                   child: ListView.builder(
                     controller: _scroll,
                     itemCount: items.length + (vm.hasMore ? 1 : 0),
@@ -134,12 +154,7 @@ class _CharacterListViewState extends State<CharacterListView> {
                         title: Text(c.name),
                         subtitle: Text('${c.species} • ${c.status}'),
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => CharacterDetailView(character: c),
-                            ),
-                          );
+                          Navigator.pushNamed(context, '/detail', arguments: c);
                         },
                       );
                     },
