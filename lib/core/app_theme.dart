@@ -1,4 +1,3 @@
-// Tema customizável para o app (opcional, pode ser expandido)
 import 'package:flutter/material.dart';
 
 final ThemeData appTheme = ThemeData(

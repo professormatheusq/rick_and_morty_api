@@ -22,6 +22,10 @@ class _CharacterListViewState extends State<CharacterListView> {
     final vm = context.read<CharacterListViewModel>();
     vm.init();
 
+    _searchCtrl.addListener(() {
+      vm.searchDebounced(_searchCtrl.text);
+    });
+
     _scroll.addListener(() {
       // Infinite scroll trigger
       if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 200) {
@@ -57,7 +61,7 @@ class _CharacterListViewState extends State<CharacterListView> {
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.search),
                     ),
-                    onSubmitted: (text) => vm.refresh(query: text),
+                    // Busca agora é debounced ao digitar
                   ),
                 ),
                 const SizedBox(width: 8),
