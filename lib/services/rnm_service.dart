@@ -12,12 +12,15 @@ class RnmService {
   Future<PagedResponse<Character>> fetchCharacters({
     int page = 1,
     String? name,
+    String? status,
   }) async {
     // Build URL with optional query
     final uri = Uri.parse('$baseUrl/character').replace(
       queryParameters: {
         'page': page.toString(),
         if (name != null && name.isNotEmpty) 'name': name,
+        if (status != null && status.isNotEmpty && status != 'Todos')
+          'status': status.toLowerCase(),
       },
     );
 

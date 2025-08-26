@@ -61,12 +61,25 @@ class _CharacterListViewState extends State<CharacterListView> {
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.search),
                     ),
-                    // Busca agora é debounced ao digitar
                   ),
                 ),
                 const SizedBox(width: 8),
+                DropdownButton<String>(
+                  value: vm.status,
+                  items: const [
+                    DropdownMenuItem(value: 'Todos', child: Text('Todos')),
+                    DropdownMenuItem(value: 'Alive', child: Text('Alive')),
+                    DropdownMenuItem(value: 'Dead', child: Text('Dead')),
+                    DropdownMenuItem(value: 'unknown', child: Text('Unknown')),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) vm.setStatus(value);
+                  },
+                ),
+                const SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: () => vm.refresh(query: _searchCtrl.text),
+                  onPressed: () =>
+                      vm.refresh(query: _searchCtrl.text, status: vm.status),
                   child: const Text('Buscar'),
                 ),
               ],

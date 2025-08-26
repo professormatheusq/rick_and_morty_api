@@ -13,6 +13,7 @@ class CharacterListViewModel extends ChangeNotifier {
   // Pagination & search
   int _currentPage = 1;
   String _query = '';
+  String _status = 'Todos';
   bool _isLoadingMore = false;
   bool _hasMore = true;
   final List<Character> _items = [];
@@ -27,6 +28,7 @@ class CharacterListViewModel extends ChangeNotifier {
   bool get isLoadingMore => _isLoadingMore;
   bool get hasMore => _hasMore;
   String get query => _query;
+  String get status => _status;
 
   Future<void> init() async {
     await refresh();
@@ -36,22 +38,29 @@ class CharacterListViewModel extends ChangeNotifier {
   void searchDebounced(String query) {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
-      refresh(query: query);
+      refresh(query: query, status: _status);
     });
   }
 
-  Future<void> refresh({String? query}) async {
+  void setStatus(String status) {
+    _status = status;
+    refresh(query: _query, status: _status);
+  }
+
+  Future<void> refresh({String? query, String? status}) async {
     _query = query ?? _query;
+    _status = status ?? _status;
     _currentPage = 1;
     _hasMore = true;
     state = Loading();
     notifyListeners();
 
     // Verifica cache
-    if (_cache.containsKey(_query) && _query.isNotEmpty) {
+    final cacheKey = '$_query|$_status';
+    if (_cache.containsKey(cacheKey) && _query.isNotEmpty) {
       _items
         ..clear()
-        ..addAll(_cache[_query]!);
+        ..addAll(_cache[cacheKey]!);
       _hasMore = false;
       state = Success(_items);
       notifyListeners();
@@ -62,6 +71,7 @@ class CharacterListViewModel extends ChangeNotifier {
       final page = await _service.fetchCharacters(
         page: _currentPage,
         name: _query,
+        status: _status != 'Todos' ? _status : null,
       );
       _items
         ..clear()
@@ -69,7 +79,7 @@ class CharacterListViewModel extends ChangeNotifier {
       _hasMore = (page.next != null);
       // Salva no cache
       if (_query.isNotEmpty) {
-        _cache[_query] = List<Character>.from(_items);
+        _cache[cacheKey] = List<Character>.from(_items);
       }
       state = Success(_items);
     } catch (e) {
@@ -88,12 +98,14 @@ class CharacterListViewModel extends ChangeNotifier {
       final page = await _service.fetchCharacters(
         page: _currentPage,
         name: _query,
+        status: _status != 'Todos' ? _status : null,
       );
       _items.addAll(page.results);
       _hasMore = (page.next != null);
       // Atualiza cache se for busca
+      final cacheKey = '$_query|$_status';
       if (_query.isNotEmpty) {
-        _cache[_query] = List<Character>.from(_items);
+        _cache[cacheKey] = List<Character>.from(_items);
       }
     } catch (_) {
       // keep items, allow retry by user scrolling again or pull-to-refresh
