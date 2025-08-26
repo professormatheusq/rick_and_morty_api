@@ -12,12 +12,18 @@ class InfoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
-          Expanded(child: Text(value)),
+          Text(
+            '$label: ',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          Expanded(child: Text(value, style: const TextStyle(fontSize: 16))),
         ],
       ),
     );
@@ -45,7 +51,12 @@ class _CharacterDetailViewState extends State<CharacterDetailView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
       body: FutureBuilder<Character>(
         future: _futureCharacter,
         builder: (context, snapshot) {
@@ -57,43 +68,123 @@ class _CharacterDetailViewState extends State<CharacterDetailView> {
             return Center(child: Text('Personagem não encontrado'));
           }
           final character = snapshot.data!;
-          return Padding(
-            padding: const EdgeInsets.all(16),
+          return Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF43CEA2), Color(0xFF185A9D)],
+              ),
+            ),
             child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 80, 16, 16),
               children: [
                 Center(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(character.image, height: 220),
+                  child: Hero(
+                    tag: 'character_${character.id}',
+                    child: Material(
+                      elevation: 10,
+                      borderRadius: BorderRadius.circular(20),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Image.network(
+                          character.image,
+                          height: 220,
+                          width: 220,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Center(
+                  child: Text(
+                    character.name,
+                    style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 1.2,
+                      shadows: [
+                        Shadow(
+                          blurRadius: 8,
+                          color: Colors.black45,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  character.name,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+                Card(
+                  color: Colors.white.withOpacity(0.92),
+                  elevation: 6,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  textAlign: TextAlign.center,
+                  child: Padding(
+                    padding: const EdgeInsets.all(18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Chip(
+                              label: Text(
+                                character.status,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                              backgroundColor: character.status == 'Alive'
+                                  ? Colors.green
+                                  : character.status == 'Dead'
+                                  ? Colors.red
+                                  : Colors.grey,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              character.species,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              character.gender == 'Male'
+                                  ? Icons.male
+                                  : character.gender == 'Female'
+                                  ? Icons.female
+                                  : Icons.transgender,
+                              color: Colors.blueGrey,
+                              size: 22,
+                            ),
+                          ],
+                        ),
+                        const Divider(height: 24),
+                        InfoTile(label: 'Gênero', value: character.gender),
+                        if (character.type.isNotEmpty)
+                          InfoTile(label: 'Tipo', value: character.type),
+                        InfoTile(label: 'Origem', value: character.originName),
+                        InfoTile(
+                          label: 'Localização',
+                          value: character.locationName,
+                        ),
+                        InfoTile(
+                          label: 'Criado em',
+                          value: character.created.split('T').first,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 16),
-                InfoTile(label: 'Espécie', value: character.species),
-                InfoTile(label: 'Status', value: character.status),
-                InfoTile(label: 'Gênero', value: character.gender),
-                if (character.type.isNotEmpty)
-                  InfoTile(label: 'Tipo', value: character.type),
-                InfoTile(label: 'Origem', value: character.originName),
-                InfoTile(label: 'Localização', value: character.locationName),
-                InfoTile(
-                  label: 'Criado em',
-                  value: character.created.split('T').first,
-                ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 Text(
-                  'Aparece em ${character.episodes.length} episódio(s)',
+                  'Aparece em ${character.episodes.length} episódio(s):',
                   style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -103,7 +194,13 @@ class _CharacterDetailViewState extends State<CharacterDetailView> {
                     runSpacing: 4,
                     children: character.episodes.map((e) {
                       final epNum = e.split('/').last;
-                      return Chip(label: Text('Ep. $epNum'));
+                      return Chip(
+                        label: Text('Ep. $epNum'),
+                        backgroundColor: Colors.white.withOpacity(0.85),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      );
                     }).toList(),
                   ),
               ],
