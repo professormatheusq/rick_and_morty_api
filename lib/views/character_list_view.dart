@@ -90,6 +90,23 @@ class _CharacterListViewState extends State<CharacterListView> {
                   },
                 ),
                 const SizedBox(width: 8),
+                IconButton(
+                  tooltip: vm.sortOrder == SortOrder.asc
+                      ? 'Ordem A-Z'
+                      : 'Ordem Z-A',
+                  icon: Icon(
+                    vm.sortOrder == SortOrder.asc
+                        ? Icons.sort_by_alpha
+                        : Icons.sort_by_alpha_outlined,
+                  ),
+                  onPressed: () {
+                    vm.setSortOrder(
+                      vm.sortOrder == SortOrder.asc
+                          ? SortOrder.desc
+                          : SortOrder.asc,
+                    );
+                  },
+                ),
                 ElevatedButton(
                   onPressed: () =>
                       vm.refresh(query: _searchCtrl.text, status: vm.status),

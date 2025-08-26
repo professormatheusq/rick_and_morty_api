@@ -4,6 +4,8 @@ import '../core/result.dart';
 import '../models/character.dart';
 import '../services/rnm_service.dart';
 
+enum SortOrder { asc, desc }
+
 class CharacterListViewModel extends ChangeNotifier {
   final RnmService _service;
   CharacterListViewModel(this._service);
@@ -17,6 +19,7 @@ class CharacterListViewModel extends ChangeNotifier {
   bool _isLoadingMore = false;
   bool _hasMore = true;
   final List<Character> _items = [];
+  SortOrder _sortOrder = SortOrder.asc;
 
   // Debounce
   Timer? _debounce;
@@ -24,7 +27,23 @@ class CharacterListViewModel extends ChangeNotifier {
   // Cache simples: query -> lista de personagens
   final Map<String, List<Character>> _cache = {};
 
-  List<Character> get items => List.unmodifiable(_items);
+  List<Character> get items {
+    final sorted = List<Character>.from(_items);
+    sorted.sort(
+      (a, b) => _sortOrder == SortOrder.asc
+          ? a.name.compareTo(b.name)
+          : b.name.compareTo(a.name),
+    );
+    return sorted;
+  }
+
+  SortOrder get sortOrder => _sortOrder;
+
+  void setSortOrder(SortOrder order) {
+    _sortOrder = order;
+    notifyListeners();
+  }
+
   bool get isLoadingMore => _isLoadingMore;
   bool get hasMore => _hasMore;
   String get query => _query;
