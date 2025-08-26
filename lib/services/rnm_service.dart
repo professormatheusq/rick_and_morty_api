@@ -4,6 +4,16 @@ import '../models/character.dart';
 import '../models/paged_response.dart';
 
 class RnmService {
+  Future<Character> fetchCharacterById(int id) async {
+    final uri = Uri.parse('$baseUrl/character/$id');
+    final response = await _client.get(uri);
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      return Character.fromJson(data);
+    }
+    throw Exception('Failed to load character: \\${response.statusCode}');
+  }
+
   static const String baseUrl = 'https://rickandmortyapi.com/api';
   final http.Client _client;
 

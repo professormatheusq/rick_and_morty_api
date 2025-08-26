@@ -171,7 +171,11 @@ class _CharacterListViewState extends State<CharacterListView> {
                         title: Text(c.name),
                         subtitle: Text('${c.species} • ${c.status}'),
                         onTap: () {
-                          Navigator.pushNamed(context, '/detail', arguments: c);
+                          Navigator.pushNamed(
+                            context,
+                            '/detail',
+                            arguments: c.id,
+                          );
                         },
                       );
                     },
