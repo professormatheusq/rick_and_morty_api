@@ -92,7 +92,9 @@ class _CharacterListViewState extends State<CharacterListView> {
         ),
         child: Column(
           children: [
-            const SizedBox(height: 32),
+            SizedBox(
+              height: kToolbarHeight + MediaQuery.of(context).padding.top + 8,
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: TextField(
