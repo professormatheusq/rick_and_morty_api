@@ -74,77 +74,100 @@ class _CharacterListViewState extends State<CharacterListView> {
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFF185A9D),
+        foregroundColor: Colors.white,
+        elevation: 4,
+        tooltip: 'Buscar',
+        onPressed: () => vm.refresh(query: _searchCtrl.text, status: vm.status),
+        child: const Icon(Icons.search, size: 30),
+      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF43CEA2), Color(0xFF185A9D)],
+            colors: [Color(0xFF232526), Color(0xFF185A9D)],
           ),
         ),
         child: Column(
           children: [
+            const SizedBox(height: 32),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 60, 16, 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: TextField(
+                controller: _searchCtrl,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'Buscar por nome...',
+                  hintStyle: const TextStyle(color: Colors.white70),
+                  filled: true,
+                  fillColor: Colors.white.withOpacity(0.15),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  prefixIcon: const Icon(Icons.search, color: Colors.white),
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 0,
+                    horizontal: 12,
+                  ),
+                ),
+              ),
+            ),
+            // Filtros como chips
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: Row(
                 children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _searchCtrl,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: 'Buscar por nome...',
-                        hintStyle: const TextStyle(color: Colors.white70),
-                        filled: true,
-                        fillColor: Colors.white.withOpacity(0.15),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.search,
-                          color: Colors.white,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 0,
-                          horizontal: 12,
-                        ),
-                      ),
+                  ChoiceChip(
+                    label: const Text('Todos'),
+                    selected: vm.status == 'Todos',
+                    onSelected: (_) => vm.setStatus('Todos'),
+                    selectedColor: Color(0xFF185A9D),
+                    labelStyle: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
+                    backgroundColor: const Color(0xFF232526),
                   ),
                   const SizedBox(width: 8),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(12),
+                  ChoiceChip(
+                    label: const Text('Alive'),
+                    selected: vm.status == 'Alive',
+                    onSelected: (_) => vm.setStatus('Alive'),
+                    selectedColor: Colors.green,
+                    labelStyle: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        dropdownColor: Colors.white,
-                        value: vm.status,
-                        style: const TextStyle(color: Colors.black),
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'Todos',
-                            child: Text('Todos'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'Alive',
-                            child: Text('Alive'),
-                          ),
-                          DropdownMenuItem(value: 'Dead', child: Text('Dead')),
-                          DropdownMenuItem(
-                            value: 'unknown',
-                            child: Text('Unknown'),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) vm.setStatus(value);
-                        },
-                      ),
-                    ),
+                    backgroundColor: const Color(0xFF232526),
                   ),
                   const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Text('Dead'),
+                    selected: vm.status == 'Dead',
+                    onSelected: (_) => vm.setStatus('Dead'),
+                    selectedColor: Colors.red,
+                    labelStyle: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    backgroundColor: const Color(0xFF232526),
+                  ),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Text('Unknown'),
+                    selected: vm.status == 'unknown',
+                    onSelected: (_) => vm.setStatus('unknown'),
+                    selectedColor: Colors.grey,
+                    labelStyle: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    backgroundColor: const Color(0xFF232526),
+                  ),
+                  const Spacer(),
                   IconButton(
                     tooltip: vm.sortOrder == SortOrder.asc
                         ? 'Ordem A-Z'
@@ -162,19 +185,6 @@ class _CharacterListViewState extends State<CharacterListView> {
                             : SortOrder.asc,
                       );
                     },
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white.withOpacity(0.2),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      elevation: 0,
-                    ),
-                    onPressed: () =>
-                        vm.refresh(query: _searchCtrl.text, status: vm.status),
-                    child: const Text('Buscar'),
                   ),
                 ],
               ),
@@ -228,75 +238,106 @@ class _CharacterListViewState extends State<CharacterListView> {
                           );
                         }
                         final c = items[index];
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 4,
-                            vertical: 6,
-                          ),
-                          child: Card(
-                            color: Colors.white.withOpacity(0.93),
-                            elevation: 6,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              leading: Hero(
-                                tag: 'character_${c.id}',
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.network(
-                                    c.image,
-                                    width: 54,
-                                    height: 54,
-                                    fit: BoxFit.cover,
+                        return TweenAnimationBuilder<double>(
+                          duration: const Duration(milliseconds: 400),
+                          tween: Tween(begin: 0.95, end: 1),
+                          curve: Curves.easeOutBack,
+                          builder: (context, scale, child) {
+                            return GestureDetector(
+                              onTapDown: (_) => setState(() {}),
+                              child: Transform.scale(
+                                scale: scale,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                    vertical: 6,
                                   ),
-                                ),
-                              ),
-                              title: Text(
-                                c.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                ),
-                              ),
-                              subtitle: Row(
-                                children: [
-                                  Chip(
-                                    label: Text(
-                                      c.status,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 12,
-                                      ),
+                                  child: Card(
+                                    color: const Color(0xFF232526),
+                                    elevation: 8,
+                                    shadowColor: Colors.black38,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
                                     ),
-                                    backgroundColor: c.status == 'Alive'
-                                        ? Colors.green
-                                        : c.status == 'Dead'
-                                        ? Colors.red
-                                        : Colors.grey,
-                                    visualDensity: VisualDensity.compact,
-                                    padding: EdgeInsets.zero,
+                                    child: ListTile(
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 8,
+                                          ),
+                                      leading: Hero(
+                                        tag: 'character_${c.id}',
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          child: Image.network(
+                                            c.image,
+                                            width: 54,
+                                            height: 54,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                      title: Text(
+                                        c.name,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      subtitle: Row(
+                                        children: [
+                                          Icon(
+                                            c.status == 'Alive'
+                                                ? Icons.favorite
+                                                : c.status == 'Dead'
+                                                ? Icons.close
+                                                : Icons.help_outline,
+                                            color: c.status == 'Alive'
+                                                ? Colors.greenAccent
+                                                : c.status == 'Dead'
+                                                ? Colors.redAccent
+                                                : Colors.grey,
+                                            size: 18,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            c.status,
+                                            style: TextStyle(
+                                              color: c.status == 'Alive'
+                                                  ? Colors.greenAccent
+                                                  : c.status == 'Dead'
+                                                  ? Colors.redAccent
+                                                  : Colors.grey[300],
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Text(
+                                            c.species,
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.white70,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      onTap: () {
+                                        Navigator.pushNamed(
+                                          context,
+                                          '/detail',
+                                          arguments: c.id,
+                                        );
+                                      },
+                                    ),
                                   ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    '${c.species}',
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                                ],
+                                ),
                               ),
-                              onTap: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  '/detail',
-                                  arguments: c.id,
-                                );
-                              },
-                            ),
-                          ),
+                            );
+                          },
                         );
                       },
                     ),
